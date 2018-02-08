@@ -38,16 +38,16 @@ L.Control.GroupedLayers = L.Control.extend({
     this._update();
 
     map
-        .on('layeradd', this._onLayerChange, this)
-        .on('layerremove', this._onLayerChange, this);
+      .on('layeradd', this._onLayerChange, this)
+      .on('layerremove', this._onLayerChange, this);
 
     return this._container;
   },
 
   onRemove: function (map) {
     map
-        .off('layeradd', this._onLayerChange, this)
-        .off('layerremove', this._onLayerChange, this);
+      .off('layeradd', this._onLayerChange, this)
+      .off('layerremove', this._onLayerChange, this);
   },
 
   addBaseLayer: function (layer, name) {
@@ -99,8 +99,8 @@ L.Control.GroupedLayers = L.Control.extend({
     if (this.options.collapsed) {
       if (!L.Browser.android) {
         L.DomEvent
-            .on(container, 'mouseover', this._expand, this)
-            .on(container, 'mouseout', this._collapse, this);
+          .on(container, 'mouseover', this._expand, this)
+          .on(container, 'mouseout', this._collapse, this);
       }
       var link = this._layersLink = L.DomUtil.create('a', className + '-toggle', container);
       link.href = '#';
@@ -108,8 +108,8 @@ L.Control.GroupedLayers = L.Control.extend({
 
       if (L.Browser.touch) {
         L.DomEvent
-            .on(link, 'click', L.DomEvent.stop)
-            .on(link, 'click', this._expand, this);
+          .on(link, 'click', L.DomEvent.stop)
+          .on(link, 'click', this._expand, this);
       } else {
         L.DomEvent.on(link, 'focus', this._expand, this);
       }
@@ -219,7 +219,7 @@ L.Control.GroupedLayers = L.Control.extend({
   },
 
   _addItem: function (obj) {
-    var label = document.createElement('label'),
+    var label = document.createElement('div'),
       input,
       checked = this._map.hasLayer(obj.layer),
       container,
@@ -242,12 +242,21 @@ L.Control.GroupedLayers = L.Control.extend({
     input.layerId = L.Util.stamp(obj.layer);
     input.groupID = obj.group.id;
     L.DomEvent.on(input, 'click', this._onInputClick, this);
-
+    
     var name = document.createElement('span');
     name.innerHTML = ' ' + obj.name;
+    
+    var deleteImage = document.createElement('img');
+    deleteImage.src = "../images/delete.png";
+    deleteImage.style = "float: right";
+    deleteImage.layerId = L.Util.stamp(obj.layer);
+    deleteImage.groupID = obj.group.id;
+    L.DomEvent.on(deleteImage, 'click', this.__onDeleteClick, this);
+    // deleteImage.addEventListener('click', this.__onDeleteClick);
 
     label.appendChild(input);
     label.appendChild(name);
+    label.appendChild(deleteImage);
 
     if (obj.overlay) {
       container = this._overlaysList;
@@ -343,6 +352,10 @@ L.Control.GroupedLayers = L.Control.extend({
     }
 
     this._handlingClick = false;
+  },
+
+  __onDeleteClick: function () {
+    window.alert('delete');
   },
 
   _expand: function () {
