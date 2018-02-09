@@ -364,8 +364,10 @@ L.Control.GroupedLayers = L.Control.extend({
 
   _onDeleteClick: function (layerId) {
     var obj = this._getLayer(layerId);
-
     this.removeLayer(obj.layer);
+    if (this.onRemoveLayer) {
+      this.onRemoveLayer(obj.name);
+    }
   },
 
   _expand: function () {
