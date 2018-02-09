@@ -65,9 +65,19 @@ L.Control.GroupedLayers = L.Control.extend({
   removeLayer: function (layer) {
     var id = L.Util.stamp(layer);
     var _layer = this._getLayer(id);
+
     if (_layer) {
-      delete this.layers[this.layers.indexOf(_layer)];
+
+      for (let index = 0; index < this._layers.length; index++) {
+        const element = this._layers[index];
+
+        if (element.name === _layer.name) {
+          this._layers.splice(index, 1);
+          map.removeLayer(element.layer);
+        }
+      }
     }
+
     this._update();
     return this;
   },
@@ -242,17 +252,15 @@ L.Control.GroupedLayers = L.Control.extend({
     input.layerId = L.Util.stamp(obj.layer);
     input.groupID = obj.group.id;
     L.DomEvent.on(input, 'click', this._onInputClick, this);
-    
+
     var name = document.createElement('span');
     name.innerHTML = ' ' + obj.name;
-    
+
     var deleteImage = document.createElement('img');
     deleteImage.src = "../images/delete.png";
     deleteImage.style = "float: right";
     deleteImage.layerId = L.Util.stamp(obj.layer);
-    deleteImage.groupID = obj.group.id;
-    L.DomEvent.on(deleteImage, 'click', this.__onDeleteClick, this);
-    // deleteImage.addEventListener('click', this.__onDeleteClick);
+    L.DomEvent.on(deleteImage, 'click', () => this._onDeleteClick(deleteImage.layerId), this);
 
     label.appendChild(input);
     label.appendChild(name);
@@ -354,8 +362,10 @@ L.Control.GroupedLayers = L.Control.extend({
     this._handlingClick = false;
   },
 
-  __onDeleteClick: function () {
-    window.alert('delete');
+  _onDeleteClick: function (layerId) {
+    var obj = this._getLayer(layerId);
+
+    this.removeLayer(obj.layer);
   },
 
   _expand: function () {
