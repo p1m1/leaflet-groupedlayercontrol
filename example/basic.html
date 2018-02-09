@@ -45,10 +45,14 @@
       groupCheckboxes: true,
       removableGroups: ["Landmarks"]
     };
-    var control = L.control.groupedLayers(ExampleData.Basemaps, groupedOverlays, options);
-    map.addControl(control);
+    var control = L.control.groupedLayers(ExampleData.Basemaps, groupedOverlays, options).addTo(map);
+    
     control.onRemoveLayer = function (layer) {
       console.log(layer);
+    }
+
+    control.onEditLayer = function (oldValue, newValue) {
+      console.log(oldValue + ' ' + newValue);
     }
 
   </script>

@@ -384,7 +384,9 @@ L.Control.GroupedLayers = L.Control.extend({
       e.target.html(e.old_value);
       alert(e.value + " is not valid layer name");
     } else {
-      console.log(e.old_value + ' ' + e.value);
+      if (this.onEditLayer) {
+        this.onEditLayer(e.old_value, e.value);
+      }
     }
   },
 
