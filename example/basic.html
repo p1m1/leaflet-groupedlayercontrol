@@ -35,9 +35,15 @@
     };
 
     // Use the custom grouped layer control, not "L.control.layers"
-    var control = L.control.groupedLayers(ExampleData.Basemaps, groupedOverlays);
+    var options = {
+      // Make the "Landmarks" group exclusive (use radio inputs)
+      exclusiveGroups: [],
+      // Show a checkbox next to non-exclusive group labels for toggling all
+      groupCheckboxes: true,
+      removableGroups: ["Landmarks"]
+    };
+    var control = L.control.groupedLayers(ExampleData.Basemaps, groupedOverlays, options);
     map.addControl(control);
-    
     control.onRemoveLayer = function (layer) {
       console.log(layer);
     }

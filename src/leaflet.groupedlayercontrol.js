@@ -9,7 +9,8 @@ L.Control.GroupedLayers = L.Control.extend({
     position: 'topright',
     autoZIndex: true,
     exclusiveGroups: [],
-    groupCheckboxes: false
+    groupCheckboxes: false,
+    removableGroups: []
   },
 
   initialize: function (baseLayers, groupedOverlays, options) {
@@ -264,7 +265,10 @@ L.Control.GroupedLayers = L.Control.extend({
 
     label.appendChild(input);
     label.appendChild(name);
-    label.appendChild(deleteImage);
+
+    if (this.options.removableGroups.includes(obj.group.name)) {
+      label.appendChild(deleteImage);
+    }
 
     if (obj.overlay) {
       container = this._overlaysList;
