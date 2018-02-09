@@ -264,7 +264,12 @@ L.Control.GroupedLayers = L.Control.extend({
     L.DomEvent.on(deleteImage, 'click', () => this._onDeleteClick(deleteImage.layerId), this);
 
     label.appendChild(input);
-    label.appendChild(name);
+
+    if (this.options.removableGroups.includes(obj.group.name)) {
+      $(label).append($(name).editable("click", this._onEditClick.bind(this)));
+    } else {
+      label.appendChild(name);
+    }
 
     if (this.options.removableGroups.includes(obj.group.name)) {
       label.appendChild(deleteImage);
@@ -371,6 +376,15 @@ L.Control.GroupedLayers = L.Control.extend({
     this.removeLayer(obj.layer);
     if (this.onRemoveLayer) {
       this.onRemoveLayer(obj.name);
+    }
+  },
+
+  _onEditClick: function (e) {
+    if (e.value === "") {
+      e.target.html(e.old_value);
+      alert(e.value + " is not valid layer name");
+    } else {
+      console.log(e.old_value + ' ' + e.value);
     }
   },
 
