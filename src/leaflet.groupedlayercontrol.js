@@ -261,7 +261,7 @@ L.Control.GroupedLayers = L.Control.extend({
     name.innerHTML = ' ' + obj.name;
 
     var deleteImage = document.createElement('img');
-    deleteImage.src = "../images/delete.png";
+    deleteImage.className = "delete-image";
     deleteImage.style = "float: right";
     deleteImage.layerId = L.Util.stamp(obj.layer);
     L.DomEvent.on(deleteImage, 'click', () => this._onDeleteClick(deleteImage.layerId), this);
