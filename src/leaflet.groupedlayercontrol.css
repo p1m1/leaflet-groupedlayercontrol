@@ -14,5 +14,5 @@
 }
 
 .delete-image{
-  background-image: url(images/delete.png);
+  content: url("../images/delete.png")
 }

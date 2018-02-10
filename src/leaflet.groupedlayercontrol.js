@@ -1,6 +1,7 @@
 /* global L */
 
 require("../src/leaflet.groupedlayercontrol.css");
+var L = require("leaflet");
 var $ = require("jquery");
 var jQuery = $;
 
@@ -77,7 +78,7 @@ L.Control.GroupedLayers = L.Control.extend({
 
         if (element.name === _layer.name) {
           this._layers.splice(index, 1);
-          map.removeLayer(element.layer);
+          this._map.removeLayer(element.layer);
         }
       }
     }
