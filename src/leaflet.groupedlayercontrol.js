@@ -1,5 +1,6 @@
 /* global L */
 
+require("../src/leaflet.groupedlayercontrol.css");
 var $ = require("jquery");
 var jQuery = $;
 

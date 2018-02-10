@@ -3,8 +3,10 @@
   "version": "0.6.0",
   "description": "A Leaflet layer control with support for grouping overlays together",
   "main": "src/leaflet.groupedlayercontrol.js",
+  "style": "src/leaflet.groupedlayercontrol.css",
   "directories": {
-    "example": "example"
+    "example": "example",
+    "images": "images"
   },
   "scripts": {
     "test": "eslint src",
