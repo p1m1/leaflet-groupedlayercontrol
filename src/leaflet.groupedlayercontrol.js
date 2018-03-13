@@ -386,11 +386,19 @@ L.Control.GroupedLayers = L.Control.extend({
   _onEditClick: function (e) {
     if (e.value === "") {
       e.target.html(e.old_value);
-      alert(e.value + " is not valid layer name");
-    } else {
-      if (this.onEditLayer) {
-        this.onEditLayer(e.old_value, e.value);
-      }
+      alert("Layer name cannot be empty!");
+      return;
+    }
+
+    var foundLayer = this._layers.find(function (x) { return x.name === e.value });
+    if (foundLayer !== undefined) {
+      e.target.html(e.old_value);
+      alert(e.value + " layer name already exists!");
+      return;
+    }
+
+    if (this.onEditLayer) {
+      this.onEditLayer(e.old_value, e.value);
     }
   },
 
