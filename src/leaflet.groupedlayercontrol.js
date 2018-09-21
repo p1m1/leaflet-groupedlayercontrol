@@ -14,8 +14,7 @@ L.Control.GroupedLayers = L.Control.extend({
     autoZIndex: true,
     exclusiveGroups: [],
     groupCheckboxes: false,
-    removableGroups: [],
-    hoverTimeout : 0
+    removableGroups: []
   },
 
   initialize: function (baseLayers, groupedOverlays, options) {
@@ -414,10 +413,7 @@ L.Control.GroupedLayers = L.Control.extend({
   },
 
   _collapse: function () {
-    setTimeout(() => {
-      this._container.className = this._container.className.replace(' leaflet-control-layers-expanded', '');      
-    }, this.options.hoverTimeout);
-
+    this._container.className = this._container.className.replace(' leaflet-control-layers-expanded', '');
   },
 
   _indexOf: function (arr, obj) {
