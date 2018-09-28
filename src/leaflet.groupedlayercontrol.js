@@ -1,11 +1,7 @@
 /* global L */
 
-require("../src/leaflet.groupedlayercontrol.css");
-var L = require("leaflet");
-var $ = require("jquery");
-var jQuery = $;
-
-(function ($) { var escape_html = function (str) { return str.replace(/</gm, "&lt;").replace(/>/gm, "&gt;") }; var unescape_html = function (str) { return str.replace(/&lt;/gm, "<").replace(/&gt;/gm, ">") }; $.fn.editable = function (event, callback) { if (typeof callback !== "function") callback = function () { }; if (typeof event === "string") { var trigger = this; var action = event; var type = "input" } else if (typeof event === "object") { var trigger = event.trigger || this; if (typeof trigger === "string") trigger = $(trigger); var action = event.action || "click"; var type = event.type || "input" } else { throw 'Argument Error - jQuery.editable("click", function(){ ~~ })' } var target = this; var edit = {}; edit.start = function (e) { trigger.unbind(action === "clickhold" ? "mousedown" : action); if (trigger !== target) trigger.hide(); var old_value = (type === "textarea" ? target.text().replace(/<br( \/)?>/gm, "\n").replace(/&gt;/gm, ">").replace(/&lt;/gm, "<") : target.text()).replace(/^\s+/, "").replace(/\s+$/, ""); var input = type === "textarea" ? $("<textarea>") : $("<input>"); input.val(old_value).css("width", type === "textarea" ? "100%" : target.width() + target.height()).css("font-size", "100%").css("margin", 0).attr("id", "editable_" + new Date * 1).addClass("editable"); if (type === "textarea") input.css("height", target.height()); var finish = function () { var result = input.val().replace(/^\s+/, "").replace(/\s+$/, ""); var html = escape_html(result); if (type === "textarea") html = html.replace(/[\r\n]/gm, "<br />"); target.html(html); callback({ value: result, target: target, old_value: old_value }); edit.register(); if (trigger !== target) trigger.show() }; input.blur(finish); if (type === "input") { input.keydown(function (e) { if (e.keyCode === 13) finish() }) } target.html(input); input.focus() }; edit.register = function () { if (action === "clickhold") { var tid = null; trigger.bind("mousedown", function (e) { tid = setTimeout(function () { edit.start(e) }, 500) }); trigger.bind("mouseup mouseout", function (e) { clearTimeout(tid) }) } else { trigger.bind(action, edit.start) } }; edit.register(); return this } })(jQuery);
+// A layer control which provides for layer groupings.
+// Author: Ishmael Smyrnow
 L.Control.GroupedLayers = L.Control.extend({
 
   options: {
@@ -14,7 +10,7 @@ L.Control.GroupedLayers = L.Control.extend({
     autoZIndex: true,
     exclusiveGroups: [],
     groupCheckboxes: false,
-    removableGroups: []
+    isHoverCollapseTime : 0
   },
 
   initialize: function (baseLayers, groupedOverlays, options) {
@@ -43,16 +39,16 @@ L.Control.GroupedLayers = L.Control.extend({
     this._update();
 
     map
-      .on('layeradd', this._onLayerChange, this)
-      .on('layerremove', this._onLayerChange, this);
+        .on('layeradd', this._onLayerChange, this)
+        .on('layerremove', this._onLayerChange, this);
 
     return this._container;
   },
 
   onRemove: function (map) {
     map
-      .off('layeradd', this._onLayerChange, this)
-      .off('layerremove', this._onLayerChange, this);
+        .off('layeradd', this._onLayerChange, this)
+        .off('layerremove', this._onLayerChange, this);
   },
 
   addBaseLayer: function (layer, name) {
@@ -70,19 +66,9 @@ L.Control.GroupedLayers = L.Control.extend({
   removeLayer: function (layer) {
     var id = L.Util.stamp(layer);
     var _layer = this._getLayer(id);
-
     if (_layer) {
-
-      for (let index = 0; index < this._layers.length; index++) {
-        const element = this._layers[index];
-
-        if (element.name === _layer.name) {
-          this._layers.splice(index, 1);
-          this._map.removeLayer(element.layer);
-        }
-      }
+      delete this.layers[this.layers.indexOf(_layer)];
     }
-
     this._update();
     return this;
   },
@@ -114,8 +100,8 @@ L.Control.GroupedLayers = L.Control.extend({
     if (this.options.collapsed) {
       if (!L.Browser.android) {
         L.DomEvent
-          .on(container, 'mouseover', this._expand, this)
-          .on(container, 'mouseout', this._collapse, this);
+            .on(container, 'mouseenter', this._expand, this)
+            .on(container, 'mouseleave', this._collapse, this);
       }
       var link = this._layersLink = L.DomUtil.create('a', className + '-toggle', container);
       link.href = '#';
@@ -123,8 +109,8 @@ L.Control.GroupedLayers = L.Control.extend({
 
       if (L.Browser.touch) {
         L.DomEvent
-          .on(link, 'click', L.DomEvent.stop)
-          .on(link, 'click', this._expand, this);
+            .on(link, 'click', L.DomEvent.stop)
+            .on(link, 'click', this._expand, this);
       } else {
         L.DomEvent.on(link, 'focus', this._expand, this);
       }
@@ -234,7 +220,7 @@ L.Control.GroupedLayers = L.Control.extend({
   },
 
   _addItem: function (obj) {
-    var label = document.createElement('div'),
+    var label = document.createElement('label'),
       input,
       checked = this._map.hasLayer(obj.layer),
       container,
@@ -261,23 +247,8 @@ L.Control.GroupedLayers = L.Control.extend({
     var name = document.createElement('span');
     name.innerHTML = ' ' + obj.name;
 
-    var deleteImage = document.createElement('img');
-    deleteImage.className = "delete-image";
-    deleteImage.style = "float: right";
-    deleteImage.layerId = L.Util.stamp(obj.layer);
-    L.DomEvent.on(deleteImage, 'click', () => this._onDeleteClick(deleteImage.layerId), this);
-
     label.appendChild(input);
-
-    if (this.options.removableGroups.includes(obj.group.name)) {
-      $(label).append($(name).editable("click", this._onEditClick.bind(this)));
-    } else {
-      label.appendChild(name);
-    }
-
-    if (this.options.removableGroups.includes(obj.group.name)) {
-      label.appendChild(deleteImage);
-    }
+    label.appendChild(name);
 
     if (obj.overlay) {
       container = this._overlaysList;
@@ -375,33 +346,6 @@ L.Control.GroupedLayers = L.Control.extend({
     this._handlingClick = false;
   },
 
-  _onDeleteClick: function (layerId) {
-    var obj = this._getLayer(layerId);
-    this.removeLayer(obj.layer);
-    if (this.onRemoveLayer) {
-      this.onRemoveLayer(obj.name);
-    }
-  },
-
-  _onEditClick: function (e) {
-    if (e.value === "") {
-      e.target.html(e.old_value);
-      alert("Layer name cannot be empty!");
-      return;
-    }
-
-    var foundLayer = this._layers.find(function (x) { return x.name === e.value });
-    if (foundLayer !== undefined) {
-      e.target.html(e.old_value);
-      alert(e.value + " layer name already exists!");
-      return;
-    }
-
-    if (this.onEditLayer) {
-      this.onEditLayer(e.old_value, e.value);
-    }
-  },
-
   _expand: function () {
     L.DomUtil.addClass(this._container, 'leaflet-control-layers-expanded');
     // permits to have a scrollbar if overlays heighter than the map.
@@ -413,7 +357,12 @@ L.Control.GroupedLayers = L.Control.extend({
   },
 
   _collapse: function () {
-    this._container.className = this._container.className.replace(' leaflet-control-layers-expanded', '');
+    setTimeout(() => {
+      this._container.className = this._container.className.replace(' leaflet-control-layers-expanded', '');      
+    }, this.options.isHoverCollapseTime);
+
+
+
   },
 
   _indexOf: function (arr, obj) {
